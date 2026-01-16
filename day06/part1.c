@@ -1,80 +1,45 @@
-#include <stddef.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "common/run.h"
+#include "instruction.c"
 
 
-typedef enum {
-    TurnOn = 0,
-    TurnOff = 1,
-    Toggle = 2,
-} Action;
-typedef struct {
-    uint32_t x0;
-    uint32_t y0;
-    uint32_t x1;
-    uint32_t y1;
-} Bounds;
 
-typedef struct {
-    Action action;
-    Bounds bounds;
-} Instruction;
-
-size_t parse_action(char* line, Action* out) {
-    if(strncmp(line, "turn on ", 8) == 0) {
-	*out = TurnOn;
-	return 8;
-    } else if(strncmp(line, "turn off ", 9) == 0) {
-	*out = TurnOff;
-	return 9;
-    } else {
-	*out = Toggle;
-	return 7;
-    }
-}
-void parse_bounds(char* line, size_t line_length, Bounds* out) {
-    char* str_ptr;
-    out->x0 = (uint32_t)strtoul(line, &str_ptr, 10);
-    out->y0 = (uint32_t)strtoul(str_ptr + 1, &str_ptr, 10);
-    // Skip " through "
-    str_ptr = strchr(str_ptr + 1, ' ');
-    out->x1 = (uint32_t)strtoul(str_ptr + 1, &str_ptr, 10);
-    out->y1 = (uint32_t)strtoul(str_ptr + 1, &str_ptr, 10);
-}
-void parse_instruction(char* line, size_t line_length, Instruction* out) {
-    size_t bound_idx = parse_action(line, &out->action);
-    parse_bounds(line + bound_idx, line_length - bound_idx, &out->bounds);
-}
-Instruction* parse_instructions(char* input, size_t input_length) {
-    size_t line_count = 0, i;
-    for(i = 0; i < input_length; i++) {
-        if(input[i] == '\n') { line_count++; }
+#define LOOP_GRID(grid, x0, y0, x1, y1, body) \
+    for (uint32_t x = x0; x <= x1; x++) { \
+        for (uint32_t y = y0; y <= y1; y++) body \
     }
 
-    Instruction* instrs = malloc(line_count * sizeof(Instruction));
+int64_t solve(char *input, size_t input_length) {
+    char grid[1000][1000] = {0};
 
-    i = 0;
-    char* line = strtok(input, "\n");
-    while (line != NULL) {
-	size_t line_length = strnlen(line, input_length);
-	parse_instruction(line, line_length, &instrs[i]);
+    Instruction *instrs;
+    size_t instr_count = parse_instructions(input, input_length, &instrs);
 
-	i++;
-        line = strtok(NULL, "\n");
+    for(size_t i = 0; i < instr_count; i++) {
+        Instruction instr = instrs[i];
+        LOOP_GRID(grid, instr.bounds.x0, instr.bounds.y0, instr.bounds.x1, instr.bounds.y1, {
+            switch (instr.action) {
+                case TurnOn:
+                    grid[x][y] = 1;
+                    break;
+                case TurnOff:
+                    grid[x][y] = 0;
+                    break;
+                case Toggle:
+                    grid[x][y] = !grid[x][y];
+                    break;
+            }
+        })
     }
 
-    return instrs;
-}
-
-int64_t solve(char *input, size_t input_length)
-{
-    Instruction* instrs = parse_instructions(input, input_length);
     int64_t result = 0;
 
+    LOOP_GRID(grid, 0, 0, 999, 999, {
+        result += grid[x][y];
+    })
 
     free(instrs);
     return result;

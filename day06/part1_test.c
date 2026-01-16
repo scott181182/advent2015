@@ -27,7 +27,7 @@ MunitResult test_input(const MunitParameter _params[], void* _user_data_or_fixtu
     munit_assert_size(input_length, >, 0); \
     int64_t result = solve(input, input_length); \
     free(input); \
-    munit_assert_int64(result, ==, 255); \
+    munit_assert_int64(result, ==, 400410); \
     return MUNIT_OK; \
 }
 
@@ -35,11 +35,12 @@ MunitTest tests[] = {
     { "/test-parse-01", test_parse_01, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL },
     { "/test-parse-02", test_parse_02, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL },
     { "/test-parse-03", test_parse_03, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL },
+    { "/test-input", test_input, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL },
     { NULL, NULL, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL }
 };
 
 static const MunitSuite suite = {
-  .prefix = "/day05/part1",
+  .prefix = "/day06/part1",
   .tests = tests,
   .suites = NULL,
   .iterations = 1,
