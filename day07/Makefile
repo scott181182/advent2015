@@ -1,4 +1,4 @@
-COMMON_DEPS := ../common/run.c
+COMMON_DEPS := ../common/run.c ../common/string.c
 TEST_DEPS := ../common/file.c ../munit/munit.c
 
 part%: part%.c $(COMMON_DEPS)

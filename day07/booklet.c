@@ -22,7 +22,7 @@ typedef enum {
 } SignalType;
 typedef union {
     unsigned short value;
-    Wire* wire;
+    String* wire;
 } SignalValue;
 typedef struct {
     SignalType type;
