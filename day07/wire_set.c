@@ -5,13 +5,24 @@
 #include "common/string.h"
 
 typedef struct {
-    String* wires;
+    String name;
+    unsigned short value;
+    unsigned char initialized;
+} Wire;
+
+void set_wire_value(Wire* wire, unsigned short value) {
+    wire->value = value;
+    wire->initialized = 1;
+}
+
+typedef struct {
+    Wire* wires;
     size_t capacity;
     size_t length;
 } WireSet;
 
 static inline int wire_set_init(WireSet *set, size_t capacity) {
-    set->wires = malloc(capacity * sizeof(String));
+    set->wires = malloc(capacity * sizeof(Wire));
     if(set->wires == NULL) { return -1; }
     set->capacity = capacity;
     set->length = 0;
@@ -27,11 +38,11 @@ static inline void wire_set_destroy(WireSet *set) {
     }
 }
 
-static inline String* wire_set_upsert(WireSet *set, char* name, size_t name_length) {
+static inline Wire* wire_set_upsert(WireSet *set, char* name, size_t name_length) {
     size_t i;
     for(i = 0; i < set->length; i++) {
-        String* a = &set->wires[i];
-        if(a->length == name_length && strncmp(a->data, name, name_length) == 0) {
+        Wire* a = &set->wires[i];
+        if(a->name.length == name_length && strncmp(a->name.data, name, name_length) == 0) {
             // Wire already exists in the set.
             // Return pointer to existing wire.
             return a;
@@ -42,7 +53,8 @@ static inline String* wire_set_upsert(WireSet *set, char* name, size_t name_leng
         return NULL;
     }
 
-    string_from_strn(name, name_length, &set->wires[set->length]);
+    set->wires[set->length].initialized = 0;
+    string_from_strn(name, name_length, &set->wires[set->length].name);
     set->length += 1;
     return &set->wires[set->length - 1];
 }

@@ -22,7 +22,7 @@ typedef enum {
 } SignalType;
 typedef union {
     unsigned short value;
-    String* wire;
+    Wire* wire;
 } SignalValue;
 typedef struct {
     SignalType type;
@@ -38,14 +38,14 @@ typedef enum {
 } InstructionType;
 
 typedef struct {
-    Signal src;
     Signal dst;
+    Signal src;
     UnaryGate gate;
 } UnaryOpInstruction;
 typedef struct {
+    Signal dst;
     Signal src1;
     Signal src2;
-    Signal dst;
     BinaryGate gate;
 } BinaryOpInstruction;
 
@@ -63,7 +63,7 @@ typedef struct {
  * Graph Representation.
  */
 typedef struct {
-    WireSet wires;
+    WireSet wire_set;
     size_t instruction_count;
     Instruction *instructions;
 } Booklet;
@@ -75,7 +75,7 @@ void parse_signal(Booklet* booklet, char *str, size_t str_length, Signal *out) {
         out->val.value = (unsigned short)strtoul(str, NULL, 10);
     } else {
         out->type = WIRE;
-        out->val.wire = wire_set_upsert(&booklet->wires, str, str_length);
+        out->val.wire = wire_set_upsert(&booklet->wire_set, str, str_length);
     }
 }
 BinaryGate parse_binary_gate(char *str, char** endptr) {
@@ -145,7 +145,7 @@ int parse_booklet(char *input, size_t input_length, Booklet *out) {
     }
 
     // There shouldn't be more wires than instructions.
-    res = wire_set_init(&out->wires, line_count + 2);
+    res = wire_set_init(&out->wire_set, line_count + 2);
     if(res != 0) {
         return res;
     }
@@ -165,7 +165,7 @@ int parse_booklet(char *input, size_t input_length, Booklet *out) {
 
 void destroy_booklet(Booklet *booklet) {
     if(booklet != NULL) {
-        wire_set_destroy(&booklet->wires);
+        wire_set_destroy(&booklet->wire_set);
         free(booklet->instructions);
         booklet->instructions = NULL;
         booklet->instruction_count = 0;
