@@ -11,9 +11,12 @@ int64_t solve(char *input, size_t input_length) {
     int status = parse_booklet(input, input_length, &booklet);
     if(status != 0) { return -1; }
 
+    Wire* b_wire = wire_set_upsert(&booklet.wire_set, "b", 1);
+    set_wire_value(b_wire, 3176);
+
     propagate_signals(&booklet);
-    Wire* out_wire = wire_set_upsert(&booklet.wire_set, "a", 1);
-    int64_t result = out_wire->value;
+    Wire* a_wire = wire_set_upsert(&booklet.wire_set, "a", 1);
+    int64_t result = a_wire->value;
 
     destroy_booklet(&booklet);
     return result;

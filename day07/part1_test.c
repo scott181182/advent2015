@@ -116,7 +116,7 @@ MunitTest tests[] = {
 };
 
 static const MunitSuite suite = {
-  .prefix = "/day06/part1",
+  .prefix = "/day07/part1",
   .tests = tests,
   .suites = NULL,
   .iterations = 1,
